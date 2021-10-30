@@ -1,0 +1,68 @@
+//================================================
+//                      TEMEL KOMUTLAR
+//================================================
+
+//1- Varola veri tabanlarini incelemek icin
+show dbs;
+
+//2- veri atabani olusturmak ya da varolani icine girmek icin 
+use("KISILER");
+
+//3-Icinde bulundugum database`i gormek icin
+use("KISILER");
+db;
+
+//4-Bulundugun database`i siler(aktif olani)
+use("KISILER");
+db.dropDatabase();
+
+//5-aktif olan veritabani collection olusrumak icin
+use("KISILER");
+db.createCollection("ogrenciler");
+
+//6-Collection`a tekli veri ekelemk icin
+use("KISILER");
+db.ogrenciler.insertOne({"ad":"Ayse", "lakap":"cakir", "maas" : 4000;
+
+//7-tum verileri listelemek icin (select gibi)
+use("KISILER");
+db.ogrenciler.find();
+
+//8-COLLECTIONS SILME
+use("KISILER");
+db.ogrenciler.drop();
+
+//9-collection`a coklu veri ekleme
+use("KISILER");
+db.ogrenciler.insertMany([
+ {"ad": "Ahmet", "soyad": "Can", "yas": 21},
+ {"ad": "Ali", "soyad": "Can", "yas": 51},
+ {"ad": "Veli", "soyad": "Gel", "yas": 22}]);
+
+//10-tarhi eklemek icin
+use("KISILER");
+db.ogrenciler.insertOne({"suanki_tarih ": new Date()});
+//2. yol
+var tarih= new Date();
+db.ogrenciler.insertOne({"suanki_tarih": tarih});
+
+​
+//Uluslararası Standardizasyon Örgütü (ISO=The International Organization for Standardization ) 
+//tarih formatı, belirsizliği ortadan kaldıran sayısal bir takvim tarihini 
+//ifade etmenin standart bir yoludur . Örneğin, Kuzey Amerikalılar genellikle
+// tarihten önceki ayı yazarlar. Avrupalılar aydan önceki tarihi 30 Mart 1998 için
+// "30.3. 1998" olarak yazarlar.
+
+use("KISILER");
+db.ogrenciler.insertOne({"ad":"oli" , "soyad" : "cin" , "tarih" : new ISODate()});
+
+
+
+use("KISILER");
+var ay =new ISODate().getMonth();
+db.ogrenciler.insertOne({"ad": "meryem" ,"soyad": "berk" ,"tarih": ay});
+//aylari index sistemine gore siraliyor. 9=ekim gibi
+
+
+
+
