@@ -2,16 +2,19 @@
 //            SORGULAR (QUERIES)
 //https://docs.mongodb.com/manual/reference/operator/query-comparison/ =>kaynak sitesi
 
+
+// sorgular basına $ işareti konulark yazılır {}olmadan olmaz
+
 ///-----------------------------------------------------------------
 //// 1- “urunler” adinda bir veritabani ve icerisinde “fiyatlar”
 //// adinda bir collection tanimlayalim.
 ////------------------------------------------------
 
-use("URUNLER")
-db.createCollection("fiyatlar")
+use("URUNLER");
+db.createCollection("fiyatlar");
 
 ////-----------------------------------------------------------------
-//2-Asagidaki dokumanlari collection`a kaudedip listeleyelim
+//2-Asagidaki dokumanlari collection`a kay  dedip listeleyelim
 ////-----------------------------------------------------------------
 db.fiyatlar.insertMany([
 {"urunAdi":"TV", "fiyat": 5000, "vergi": 10 ,"summary":[{"version":1},{"show":"yok"}]},
@@ -38,7 +41,7 @@ db.fiyatlar.find().skip(1).limit(2);
 //5-1. dokumani sorgula
 ////-----------------------------------------------------------------
 use("URUNLER")
-db.fiyatlar.find().limit(1);// koseli parntez
+db.fiyatlar.find().limit(1);// koseli parntez.yani dizi olarak getirir
 
 db.fiyatlar.findOne();//suslu parantez
 
@@ -46,12 +49,12 @@ db.fiyatlar.findOne();//suslu parantez
 
 ///=================================================================
 ////       LOGICAL QUERY OPERATOR (mantıksal sorgu) ($and ,$or, $not,$nor)
-////
+//// 
 //// SYNTAX: { $and: [ {ifade1}, {ifade2} , ... , {ifadeN} ] }
 ////         { field: { $not: { <operator-ifade> } } }  ==> ( {"vergi": {$not: {$eq:10}}});
 ////=================================================================
 
-{$and:[{fiyat : 5},{adı :"utu"}] }//and ve or
+{$and:[{fiyat : 5},{adı :"utu"}] }//and ve or syntax ayni
 {
     "fiyat":{$not:{$eq:10}}
 }
@@ -59,25 +62,172 @@ db.fiyatlar.findOne();//suslu parantez
 ////-----------------------------------------------------------------
 //// 5) Collection asagidaki dokumani ekleyelim.    
 // ////-----------------------------------------------------------------
-use("URUNLER")
+use("URUNLER");
 db.fiyatlar.insertOne({"urunAdi":"Koltuk", "fiyat": 5000, "vergi": 10});
+
+use("URUNLER");
 db.fiyatlar.find();
 
 //6-fiyati=5000 olan ve urun adi=tv olan dokumanlari listele
 use("URUNLER")
-db.fiyatlar.find(  {$and: [ {fiyat:5000}, {urunAdi="TV"}] })
+db.fiyatlar.find(  {$and: [ {fiyat:5000}, {urunAdi:"TV"}] })
 
-//7-UrunAdi=tu olan veya vergi -1= olan dokumani sorgulayiniz
+//7-UrunAdi=tu olan veya vergi=10 olan dokumani sorgulayiniz
+use("URUNLER")
+db.fiyatlar.find({$or : [{urunAdi:"utu"}, {vergi:10}]})
  
+//8- fiyat=500 olan urunler
+use("URUNLER");
+db.fiyatlar.find({fiyat : 5000});
+//2. yol
+use("URUNLER");
+db.fiyatlar.find({fiyat : {$eq:5000}, $comment:"bu sekilde yorum yazilabilir"});
+
+//9-vergi=10 olmayan dokumanlar
+use("URUNLER");
+db.fiyatlar.find({vergi: {$not: { $eq:10}}});
+
+//10-(urunAdi=tv ve vergisi=10 ) olmayan dokumanlar
+
+use("URUNLER");
+db.fiyatlar.find({$and:[{urunAdi: {$not:{$eq:"TV"} }}, {vergi:{$not:{$eq:10}}}]} );//neden olmadi sor***
+
+use("URUNLER");
+db.fiyatlar.find( {$nor :[{urunAdi:"TV"}, {vergi:10}]});
+
+////-----------------------------------------------------------------
+//// 11) urunAdi=TV olan kayitlarin sadece fiyat`ini listeleyiniz.
+////     (Bu isleme Projection denilmektedir)
+//// Projection`da gosterilmek istenen Field`a 1 degeri atanir Ornegin:
+//// {"fiyat":1}, gosterilmek istenmeyenler ise yazilmaz.
+//// Sadece _id icin bir istisna vardir.  onu istemiyorsak 0 ile belirticez
+////
+// //// SYNTAX   db.collection.find( {query}, {projection}). aynı kişinin fiyatını id sini istediği için aynı parantez, süslünün biri filtreleme şartları  için, biri göstermek istediğimiz field lar için
+////-----------------------------------------------------------------
+use("URUNLER");
+db.fiyatlar.find({urunAdi:"TV"},{fiyat:1 ,_id:0});
+
+//12- Tum dokumalarin sadece fiyat ve urunAdini listele
+use("URUNLER");
+db.fiyatlar.find({},{fiyat:1, urunAdi:1, _id:0});
+
+////=================================================================
+////                    COMPARAISON (karşılaştırma) OPERATOR 
+//// $eq : esit mi
+//// $lt : kücük mü  (less than)  <
+//// $gt : buyuk mu (greater than) >
+//// $lte: kucuk esit mi <= 
+//// $gte: buyuk esit mi   >=
+//// $ne : esit degil mi
+//// $in : belirtilen degerler, bir dizideki degerlerden birisine esit mi  
+//// $nin: belirtilen degerler, bir dizideki tum degerlere esit degil mi
+//// SYNTAX :   {field: {$gte: value} }  ==>   {   fiyat: { $ gte :5000}}
+////=================================================================
 
 
+// 13)   fiyatı 3500 e eşit veya daha fazla olan ürünlerin sadece ad ve fiyatlarını listele
+use("URUNLER");
+db.fiyatlar.find({fiyat: {$gte:3500}},{fiyat:1, urunAdi:1, _id:0});
+
+// 14)   fiyatı 3500 e eşit veya daha az olan ürünlerin sadece ad 
+use("URUNLER");
+db.fiyatlar.find({fiyat: {$lte:4000}},{urunAdi:1, _id:0});
+
+//15-fiyati 1500 veya 3500 veya 7000 olan urunleri listele
+use("URUNLER");
+db.fiyatlar.find({$or:[{fiyat:1500}, {fiyat:3500}, {fiyat:7000}]});
+
+use("URUNLER");
+db.fiyatlar.find({fiyat:{$in:[1500,3500,7000]}});
+
+//16-fiyati 1500 veya 3500 veya 7000 olmayan urunleri listele
+use("URUNLER");
+db.fiyatlar.find({fiyat:{$nin:[1500,3500,7000]}},{_id:0});
 
 
+/// 17) fiyatı 5000'den kucuk olup urunAdi Utu olmayan urunlerin
+//// SADECE urunAdi ve fiyat bilgilerini listeleyiniz
+use("URUNLER");
+db.fiyatlar.find({fiyat:{$lt:5000 },$nor:[{urunAdi:"Utu"}]},{urunAdi:1, 
+fiyat:1, _id:0});
+
+use("URUNLER");
+db.fiyatlar.find({fiyat:{$lt:5000 },urunAdi :{$ne:"Utu"} },{urunAdi:1, 
+fiyat:1, _id:0});
+
+//// 18) fiyatı 5000'den kucuk olan VEYA urunAdi Koltuk olan urunlerin
+//// SADECE urunAdi ve fiyat bilgilerini listeleyiniz
+use("URUNLER");
+db.fiyatlar.find({$or:[{fiyat:{$lt:5000}},{urunAdi:"Koltuk"}]},{urunAdi:1,fiyat:1,_id:0})
+
+////-----------------------------------------------------------------
+//// 20) urunlerin tamamini SADECE urunAdini ve fiyat gosterecek sekilde  
+////     fiyatlarina gore artan sirada listeleyiniz.
+////-----------------------------------------------------------------
+// 1 : artan , -1: azalan ...projection 2. sırada yazılacağı için, query (filtre) istemiyorsak bile boş süslü
 
 
+use("URUNLER");
+db.fiyatlar.find({},{fiyat:1,urunAdi:1,_id:0}).sort({fiyat:1 });
+
+//21) urunlerin tamamini SADECE urunAdini  gosterecek sekilde  
+////     urunAdı na gore ters sirada listeleyiniz.
+use("URUNLER");
+db.fiyatlar.find({},{urunAdi:1,_id:0}).sort({urunAdi:-1 });
 
 
+// ödev
+// hastane database, hastalar, doktorlar collections oluştur. 
+//ad,soyad, doktorsa maaş ve uzmanlığı, hastaysa hastalığı gir (çoklu veri girişi ile). 
+//1-maası sundan büyük olan veya uzmanlığı .......olan doktorları,
+//2-maası ........olanları listele,
+//3-en yüksek 3 ü seç,  
+//4-hastaları alfabetik sırala
 
+use("HASTANE");
+db.createCollection("hastalar");
+db.hastalar.insertMany([
+    {ad:"ayse",soyad:"saglam",hastalik:"grip"},
+    {ad:"ali",soyad:"turgut",hastalik:"ishal"},
+    {ad:"serap",soyad:"tunc",hastalik:"kalp"},
+    {ad:"selin",soyad:"dar",hastalik:"grip"},
+    {ad:"mert",soyad:"yas",hastalik:"mide"}
+]);
+db.createCollection("doktorlar");
+db.doktorlar.insertMany([
+    {ad:"Hatice",soyad:"gulsu",maas:"7000" ,uzmanlik:"KBB"},
+    {ad:"Sarp",soyad:"duman",maas:"7500" ,uzmanlik:"Dahiliye"},
+    {ad:"Asli",soyad:"tulin",maas:"7700" ,uzmanlik:"Dahiliye"},
+    {ad:"Aylin",soyad:"colak",maas:"7000" ,uzmanlik:"Gogus Hastaliklari"},
+    {ad:"Hasan",soyad:"bayir",maas:"8400" ,uzmanlik:"Genel Cerrahi"}
+]);
+use("HASTANE");
+db.doktorlar.updateMany({maas:"7000"},{$set:{maas:7000}});
+
+use("HASTANE");
+db.doktorlar.update({maas:"7500"},{$set:{maas:7500}});
+use("HASTANE");
+db.doktorlar.update({maas:"7700"},{$set:{maas:7700}});
+use("HASTANE");
+db.doktorlar.update({maas:"8400"},{$set:{maas:8400}});
+
+//1-Maasi 7500 den buyuk olan veya uzamnligi Genel cerrahi olan 
+//doktorlari sorgula
+use("HASTANE");
+db.doktorlar.find({$or: [{maas:{$gte:7500}},{uzmanlik:"KBB"}]});
+
+//2-maasi 7000 olanlari listele
+use("HASTANE");
+db.doktorlar.find({ maas:7000}).sort({ad:1});
+
+//3-maasi en yuksek olan 3 kisi
+use("HASTANE");
+db.doktorlar.find({}).sort({maas:-1}).limit(3);
+
+
+//4- Hastalari isme gore alfabetik sirala
+use("HASTANE");
+db.hastalar.find({},{_id:0}).sort({ad:1});
 
 
 
